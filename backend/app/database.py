@@ -1,22 +1,29 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
-from app.config import settings 
+from sqlalchemy.pool import StaticPool
 
-#create sqlalchemy engine
-engine = create_engine(settings.DATABASE_URL, pool_pre_ping=True)
+from app.config import settings
 
-#Sessionlocal for handling databasesessions per call
+# Create an in-memory SQLite engine with a shared connection when configured
+# for tests; SQLite connections also need to work across FastAPI worker threads.
+connect_args = {}
+engine_options = {"pool_pre_ping": True}
+if settings.DATABASE_URL.startswith("sqlite"):
+    connect_args["check_same_thread"] = False
+    engine_options.pop("pool_pre_ping")
+    if settings.DATABASE_URL in {"sqlite://", "sqlite:///:memory:"}:
+        engine_options["poolclass"] = StaticPool
+
+engine = create_engine(settings.DATABASE_URL, connect_args=connect_args, **engine_options)
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
-#baseclass for orm-modells
 Base = declarative_base()
 
+
 def get_db():
-  """
-  A dependency that creates and closes datasessions securely per req
-  """
-  db = SessionLocal()
-  try:
-    yield db
-  finally: 
-    db.close()
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()

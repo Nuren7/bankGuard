@@ -1,13 +1,15 @@
-from pytdantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
-  DATABASE_URL: str
-  GROQ_API_KEY: str
-  HMAC_SECRET: str
-  
-  model_config = SettingsConfigDict(
-    env_file=".env"
-    env_file_encoder="utf-8"
-    extra="ignore"
-  )
-  settings = Settings()
+    DATABASE_URL: str = "sqlite:///./bankguard.db"
+    GROQ_API_KEY: str = ""
+    HMAC_SECRET: str = ""
+
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
+
+
+settings = Settings()

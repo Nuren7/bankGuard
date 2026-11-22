@@ -1,0 +1,39 @@
+# --- Miljövariabler & hemligheter ---
+.env
+.env.local
+.env.*.local
+
+# --- Python / FastAPI (Backend) ---
+backend/__pycache__/
+backend/**/__pycache__/
+backend/.pytest_cache/
+backend/.venv/
+backend/venv/
+backend/env/
+backend/*.pyc
+backend/.mypy_cache/
+backend/.ruff_cache/
+backend/dist/
+backend/build/
+backend/*.egg-info/
+
+# --- Node.js / Next.js (Frontend) ---
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/dist/
+frontend/build/
+frontend/.turbo/
+
+# --- Editorer & OS-specifikt ---
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+
+# --- Docker & Databas ---
+# Om du sparar lokal databasdata eller containervolymer i mappen
+docker-data/
+*.log
