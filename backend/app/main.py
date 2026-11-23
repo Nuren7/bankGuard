@@ -4,6 +4,7 @@ from decimal import Decimal
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.config import settings
 from app.database import Base, SessionLocal, engine
 from app.models import Account
 from app.routers import accounts, payments, webhooks
@@ -27,7 +28,7 @@ async def lifespan(_: FastAPI):
 app = FastAPI(title="BankGuard API", lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=settings.cors_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
