@@ -7,9 +7,15 @@ import type {
   PaymentResponse,
 } from "@/types/banking";
 
-const API_BASE_URL = (
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
-).replace(/\/+$/, "");
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL?.trim().replace(/\/+$/, "");
+
+function buildApiUrl(path: string): string {
+  if (!API_BASE_URL) {
+    throw new Error("NEXT_PUBLIC_API_URL must be set to the backend URL.");
+  }
+
+  return `${API_BASE_URL}/${path.replace(/^\/+/, "")}`;
+}
 
 export class ApiError extends Error {
   constructor(
@@ -23,10 +29,15 @@ export class ApiError extends Error {
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   let response: Response;
+  const headers = new Headers(init?.headers);
+  if (init?.body !== undefined && init.body !== null && !headers.has("Content-Type")) {
+    headers.set("Content-Type", "application/json");
+  }
 
   try {
-    response = await fetch(`${API_BASE_URL}${path}`, {
+    response = await fetch(buildApiUrl(path), {
       ...init,
+      headers,
       cache: "no-store",
     });
   } catch (error) {
@@ -81,7 +92,6 @@ export function submitPayment(
   return request<PaymentResponse>("/api/payments", {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
       "Idempotency-Key": idempotencyKey,
     },
     body: JSON.stringify(payment),
@@ -95,7 +105,6 @@ export function sendClearingWebhook(
   return request<ClearingWebhookResponse>("/api/webhooks/clearing", {
     method: "POST",
     headers: {
-      "Content-Type": "application/json",
       "X-Signature": signature,
     },
     body: JSON.stringify(payload),
